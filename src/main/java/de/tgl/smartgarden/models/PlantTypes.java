@@ -3,16 +3,17 @@ package de.tgl.smartgarden.models;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.List;
+import java.io.Serializable;
 
 @Entity
 @Data
-public class Garden {
+public class PlantTypes implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String description;
-    @OneToMany(mappedBy = "garden")
-    private List<PlantTypes> plantTypes;
+
+    @ManyToOne
+    @JoinColumn(name = "Garden_id")
+    private Garden garden;
 }
