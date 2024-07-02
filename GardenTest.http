@@ -1,0 +1,9 @@
+POST http://localhost:8080/gardens
+Content-Type: application/json
+
+{
+"name":"asdf","description":"roses and other flowers","location":"south lawn"
+}
+
+###
+GET http://localhost:8080/gardens
