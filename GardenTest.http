@@ -1,9 +1,53 @@
-POST http://localhost:8080/gardens
+@gardenId =2
+@temperature = "TEMPERATURE"
+@now = "2024-07-04T21:37:42.580597"
+###
+GET http://localhost:8080/api/v1/gardens
+Content-Type: application/json
+
+###
+POST http://localhost:8080/api/v1/gardens
 Content-Type: application/json
 
 {
-"name":"asdf","description":"roses and other flowers","location":"south lawn"
+  "name": "",
+  "description": ""
 }
 
 ###
-GET http://localhost:8080/gardens
+GET http://localhost:8080/api/v1/gardens/{{gardenId}}/sensors
+Content-Type: application/json
+
+###
+POST http://localhost:8080/api/v1/gardens/{{gardenId}}/sensors
+Content-Type: application/json
+
+{
+  "gardenId": 3,
+  "type": {{temperature}},
+  "sensorValue": 0,
+  "unitOfMeasurement": "",
+  "lastReadingAt": {{now}}
+}
+
+###
+POST http://localhost:8080/api/v1/gardens/{{gardenId}}/water?
+    waterAmount={{$random.float(100)}}
+    Content-Type: application/x-www-form-urlencoded
+
+###
+POST http://localhost:8080/api/v1/gardens/{{gardenId}}/prune
+Content-Type: application/x-www-form-urlencoded
+
+###
+POST http://localhost:8080/api/v1/gardens/{{gardenId}}/prune
+Content-Type: application/x-www-form-urlencoded
+
+###
+GET http://localhost:8080/api/v1/gardens/{{gardenId}}/notifications
+Content-Type: application/json
+
+###
+POST http://localhost:8080/api/v1/gardens/{{gardenId}}/notifications
+Content-Type: application/json
+

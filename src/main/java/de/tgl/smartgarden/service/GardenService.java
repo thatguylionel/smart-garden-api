@@ -9,7 +9,7 @@ import java.util.List;
 public interface GardenService {
     List<Garden> getAll();
 
-    String add(Garden garden);
+    Garden add(Garden garden);
 
     @Service
     class GardenServiceImpl implements GardenService {
@@ -25,10 +25,9 @@ public interface GardenService {
         }
 
         @Override
-        public String add(Garden garden) {
-            gardenRepository.save(garden);
-            return String.valueOf(garden.getId());
+        public Garden add(Garden garden) {
+            return gardenRepository.save(garden);
         }
-
     }
 }
+

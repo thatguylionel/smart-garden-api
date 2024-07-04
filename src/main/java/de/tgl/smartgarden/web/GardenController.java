@@ -1,111 +1,98 @@
 package de.tgl.smartgarden.web;
 
 import de.tgl.smartgarden.models.Garden;
+import de.tgl.smartgarden.models.Notification;
+import de.tgl.smartgarden.models.Sensor;
+import de.tgl.smartgarden.models.WateringEvent;
 import de.tgl.smartgarden.service.GardenService;
 import de.tgl.smartgarden.service.NotificationService;
-import de.tgl.smartgarden.service.SensorsService;
+import de.tgl.smartgarden.service.SensorService;
 import de.tgl.smartgarden.service.WaterService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("gardens")
+@RequestMapping("/api/v1/gardens")
 public class GardenController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GardenController.class);
+    private static final Logger logger = LoggerFactory.getLogger(GardenController.class);
     private final GardenService gardenService;
-    private final SensorsService sensorsService;
+    private final SensorService sensorService;
     private final NotificationService notificationService;
     private final WaterService waterService;
 
-    public GardenController(GardenService gardenService, SensorsService sensorsService, NotificationService notificationService, WaterService waterService) {
+    public GardenController(GardenService gardenService, SensorService sensorService,
+                            NotificationService notificationService, WaterService waterService) {
         this.gardenService = gardenService;
-        this.sensorsService = sensorsService;
+        this.sensorService = sensorService;
         this.notificationService = notificationService;
         this.waterService = waterService;
     }
 
-    /**
-     * Retrieve a list of all gardens associated with a user.
-     *
-     * @return A List of type {@link Garden}
-     */
-    @GetMapping(produces = "application/json")
-    public List<Garden> getAll() {
-        return gardenService.getAll();
+    @GetMapping
+    public ResponseEntity<List<Garden>> getAllGardens() {
+        List<Garden> gardens = gardenService.getAll();
+        return ResponseEntity.ok(gardens);
     }
 
-    /**
-     * Create a new garden with details such as name, location and plant types.
-     *
-     * @param garden object
-     * @return the id
-     */
     @PostMapping
-    public String addGarden(@RequestBody Garden garden) {
-        return gardenService.add(garden);
+    public ResponseEntity<Garden> addGarden(@Valid @RequestBody Garden garden) {
+        Garden savedGarden = gardenService.add(garden);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedGarden);
     }
 
-    /**
-     * Retrieve the current temperature, humidity and light values for a specific garden.
-     *
-     * @param id of type {@link Long}
-     * @return list of sensors
-     */
-    @GetMapping("/{garden_id}/sensors")
-    public List<String> getSensors(@PathVariable("garden_id") Long id) {
-        LOGGER.info("Garden {} sensors", id);
-        return sensorsService.getAll();
+    @GetMapping("/{gardenId}/sensors")
+    public ResponseEntity<List<Sensor>> getSensors(@PathVariable Long gardenId) {
+        logger.info("Fetching sensors for garden {}", gardenId);
+        List<Sensor> sensors = sensorService.getAllByGardenId(gardenId);
+        return ResponseEntity.ok(sensors);
     }
 
-    /**
-     * Trigger an irrigation cycle for a specific garden.
-     *
-     * @param id of type {@link Long}
-     * @return n/a
-     */
-    @PostMapping("/{garden_id}/water")
-    public String addWater(@PathVariable("garden_id") String id) {
-        LOGGER.info("Garden {} water", id);
-        return waterService.add(id);
+    @PostMapping("/{gardenId}/sensors")
+    public ResponseEntity<Sensor> addSensor(@PathVariable Long gardenId, @Valid @RequestBody Sensor sensor) {
+        logger.info("Adding sensor for garden {}", gardenId);
+        Sensor savedSensor = sensorService.addSensor(gardenId, sensor);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedSensor);
     }
 
-    /**
-     * Triggers a pruning cycle for a specific garden.
-     *
-     * @param id of type {@link Long}
-     * @return n/a
-     */
-    @PostMapping("/{garden_id}/prune")
-    public String prune(@PathVariable("garden_id") String id) {
-        LOGGER.info("Garden {} prune", id);
-        return "Garden pruned";
+
+    @PostMapping("/{gardenId}/water")
+    public ResponseEntity<WateringEvent> waterGarden(@PathVariable Long gardenId, @RequestParam(defaultValue = "1.0") double waterAmount) {
+        logger.info("Watering garden {} with {} units of water", gardenId, waterAmount);
+        WateringEvent result = waterService.waterGarden(gardenId, waterAmount);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
-    /**
-     * Retrieves a list of notifications for a specific garden, e.g. when it is time to water or prune.
-     *
-     * @param id of type {@link Long}
-     * @return n/a
-     */
-    @GetMapping("/{garden_id}/notifications")
-    public List<String> getNotifications(@PathVariable("garden_id") String id) {
-        LOGGER.info("Garden {} notifications", id);
-        return notificationService.getAll(id);
+    @PostMapping("/{gardenId}/prune")
+    public ResponseEntity<String> pruneGarden(@PathVariable Long gardenId) {
+        logger.info("Pruning garden {}", gardenId);
+        // Implement pruning logic in a separate service
+        return ResponseEntity.ok("Garden pruned successfully");
     }
 
-    /**
-     * Create a new notification for a specific garden.
-     *
-     * @param id of type {@link Long}
-     * @return n/a
-     */
-    @PostMapping("/{garden_id}/notifications")
-    public String addNotification(@PathVariable("garden_id") String id) {
-        LOGGER.info("Garden {} notification", id);
-        return "Notification added";
+    @GetMapping("/{gardenId}/notifications")
+    public ResponseEntity<List<Notification>> getNotifications(@PathVariable Long gardenId) {
+        logger.info("Fetching notifications for garden {}", gardenId);
+        List<Notification> notifications = notificationService.getAllByGardenId(gardenId);
+        return ResponseEntity.ok(notifications);
     }
 
+    @PostMapping("/{gardenId}/notifications")
+    public ResponseEntity<Notification> addNotification(@PathVariable Long gardenId,
+                                                        @Valid @RequestBody Notification notification) {
+        logger.info("Adding notification for garden {}", gardenId);
+        Notification savedNotification = notificationService.addNotification(gardenId, notification);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedNotification);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception e) {
+        logger.error("An error occurred", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+    }
 }

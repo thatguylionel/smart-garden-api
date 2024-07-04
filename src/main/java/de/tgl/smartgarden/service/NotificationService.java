@@ -1,18 +1,34 @@
 package de.tgl.smartgarden.service;
 
+import de.tgl.smartgarden.models.Notification;
+import de.tgl.smartgarden.repositories.NotificationRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 public interface NotificationService {
-    List<String> getAll(String gardenid);
+    List<Notification> getAllByGardenId(Long gardenId);
+
+    Notification addNotification(Long gardenId, Notification notification);
 
     @Service
     class NotificationServiceImpl implements NotificationService {
+        private final NotificationRepository notificationRepository;
+
+        public NotificationServiceImpl(NotificationRepository notificationRepository) {
+            this.notificationRepository = notificationRepository;
+        }
 
         @Override
-        public List<String> getAll(String gardenid) {
-            return List.of("Notification 1", "Notification 2", "Notification 3", "Notification 4");
+        public List<Notification> getAllByGardenId(Long gardenId) {
+            return notificationRepository.findAllByGardenId(gardenId);
+        }
+
+        @Override
+        public Notification addNotification(Long gardenId, Notification notification) {
+            notification.setGardenId(gardenId);
+            return notificationRepository.save(notification);
         }
     }
 }
+
