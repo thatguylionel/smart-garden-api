@@ -34,6 +34,11 @@ public class GardenController {
         this.waterService = waterService;
     }
 
+    /**
+     * This method is responsible for returning all Garden information, in a {@link List}
+     *
+     * @return the list of gardens
+     */
     @GetMapping
     public ResponseEntity<List<Garden>> getAllGardens() {
         List<Garden> gardens = gardenService.getAll();
@@ -73,13 +78,6 @@ public class GardenController {
         logger.info("Pruning garden {}", gardenId);
         // Implement pruning logic in a separate service
         return ResponseEntity.ok("Garden pruned successfully");
-    }
-
-    @GetMapping("/{gardenId}/notifications")
-    public ResponseEntity<List<Notification>> getNotifications(@PathVariable Long gardenId) {
-        logger.info("Fetching notifications for garden {}", gardenId);
-        List<Notification> notifications = notificationService.getAllByGardenId(gardenId);
-        return ResponseEntity.ok(notifications);
     }
 
     @PostMapping("/{gardenId}/notifications")

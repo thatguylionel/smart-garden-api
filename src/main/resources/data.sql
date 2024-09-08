@@ -58,9 +58,9 @@ CREATE TABLE IF NOT EXISTS watering_events
     FOREIGN KEY (garden_id) REFERENCES gardens (id)
 );
 
--- Insert sample data
+-- Insert sample data.
 
--- Gardens
+-- Gardens 3
 INSERT INTO gardens (id, name, description)
 VALUES (1, 'Rooftop Garden', 'A beautiful garden on the roof of our building'),
        (2, 'Backyard Oasis', 'A lush garden in the backyard with various plants'),
